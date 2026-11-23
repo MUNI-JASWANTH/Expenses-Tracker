@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FirstMauiApp.ViewModels"
+             xmlns:models="clr-namespace:FirstMauiApp.Models"
+             xmlns:converters="clr-namespace:FirstMauiApp.Converters"
+             x:Class="FirstMauiApp.Views.DashboardPage"
+             x:DataType="viewmodels:DashboardViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:DecimalToCurrencyConverter x:Key="CurrencyConverter" />
+            <converters:NegativeToPositiveConverter x:Key="NegativeToPositiveConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add" Command="{Binding AddTransactionCommand}" Priority="0" Order="Primary" />
+    </ContentPage.ToolbarItems>
+
+    <RefreshView Command="{Binding LoadDataCommand}" IsRefreshing="{Binding IsLoading}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="16">
+
+                <!-- Month Navigation -->
+                <Grid ColumnDefinitions="44,*,44" HorizontalOptions="Center">
+                    <Button Grid.Column="0" Text="&lt;" Command="{Binding PreviousMonthCommand}" WidthRequest="44" HeightRequest="44" CornerRadius="22" />
+                    <Label Grid.Column="1" Text="{Binding MonthYearDisplay}" FontSize="20" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" Margin="12,0" />
+                    <Button Grid.Column="2" Text="&gt;" Command="{Binding NextMonthCommand}" WidthRequest="44" HeightRequest="44" CornerRadius="22" />
+                </Grid>
+
+                <!-- Summary Cards -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                    <!-- Income Card -->
+                    <Border Grid.Column="0" BackgroundColor="#E8F5E9" Padding="16" StrokeShape="RoundRectangle 12" Stroke="Transparent">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Income" FontSize="13" TextColor="#2E7D32" />
+                            <Label Text="{Binding Summary.TotalIncome, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontAttributes="Bold" TextColor="#2E7D32" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Expense Card -->
+                    <Border Grid.Column="1" BackgroundColor="#FFEBEE" Padding="16" StrokeShape="RoundRectangle 12" Stroke="Transparent">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Expenses" FontSize="13" TextColor="#C62828" />
+                            <Label Text="{Binding Summary.TotalExpense, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontAttributes="Bold" TextColor="#C62828" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Balance Card -->
+                    <Border Grid.Column="2" Padding="16" StrokeShape="RoundRectangle 12" Stroke="Transparent"
+                           BackgroundColor="{Binding Summary.NetBalance, Converter={StaticResource NegativeToPositiveConverter}, ConverterParameter='#E8F5E9|#FFEBEE'}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Balance" FontSize="13" TextColor="{Binding Summary.NetBalance, Converter={StaticResource NegativeToPositiveConverter}, ConverterParameter='#2E7D32|#C62828'}" />
+                            <Label Text="{Binding Summary.NetBalance, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontAttributes="Bold" TextColor="{Binding Summary.NetBalance, Converter={StaticResource NegativeToPositiveConverter}, ConverterParameter='#2E7D32|#C62828'}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- Budget Alerts -->
+                <VerticalStackLayout Spacing="6" IsVisible="{Binding HasBudgetAlerts}">
+                    <Label Text="⚠️ Budget Alerts" FontSize="16" FontAttributes="Bold" TextColor="#E65100" />
+                    <CollectionView ItemsSource="{Binding BudgetAlerts}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodels:BudgetAlert">
+                                <Border Padding="10" StrokeShape="RoundRectangle 8" Stroke="{Binding AlertColor}" Margin="0,2" BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3E2723}">
+                                    <Label Text="{Binding AlertMessage}" FontSize="13" TextColor="{Binding AlertColor}" />
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- Quick Actions -->
+                <Border BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}" Padding="16" StrokeShape="RoundRectangle 12" Stroke="LightGray">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Quick Actions" FontSize="18" FontAttributes="Bold" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="48,48" RowSpacing="12">
+                            <Button Grid.Row="0" Grid.Column="0" Text="Add Transaction" Command="{Binding AddTransactionCommand}" BackgroundColor="#512BD4" TextColor="White" CornerRadius="8" />
+                            <Button Grid.Row="0" Grid.Column="1" Text="View Reports" Command="{Binding ViewReportsCommand}" BackgroundColor="#00695C" TextColor="White" CornerRadius="8" />
+                            <Button Grid.Row="1" Grid.Column="0" Text="All Transactions" Command="{Binding ViewAllTransactionsCommand}" BackgroundColor="#1565C0" TextColor="White" CornerRadius="8" />
+                            <Button Grid.Row="1" Grid.Column="1" Text="Budgets" Command="{Binding ViewBudgetsCommand}" BackgroundColor="#E65100" TextColor="White" CornerRadius="8" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Recent Transactions -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="Recent Transactions" FontSize="18" FontAttributes="Bold" VerticalOptions="Center" />
+                    <Label Grid.Column="1" VerticalOptions="Center">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding RecentTransactions.Count}" FontAttributes="Bold" />
+                                <Span Text=" transactions" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding RecentTransactions}" SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Transaction">
+                            <Border Margin="0,4" Padding="12" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{AppThemeBinding Light=White, Dark=#2D2D2D}">
+                                <Grid ColumnDefinitions="48,*,Auto" ColumnSpacing="12">
+                                    <Border Grid.Column="0" WidthRequest="48" HeightRequest="48" StrokeShape="RoundRectangle 24" Stroke="Transparent" BackgroundColor="{Binding CategoryColor}" VerticalOptions="Center">
+                                        <Label Text="{Binding CategoryIcon}" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                        <Label Text="{Binding Description}" FontSize="16" FontAttributes="Bold" LineBreakMode="TailTruncation" />
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="{Binding CategoryDisplay}" FontSize="12" TextColor="Gray" />
+                                            <Label Text="•" FontSize="12" TextColor="Gray" />
+                                            <Label Text="{Binding Date, StringFormat='{0:MMM dd, HH:mm}'}" FontSize="12" TextColor="Gray" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center">
+                                        <Label Text="{Binding FormattedSignedAmount}" FontSize="16" FontAttributes="Bold" TextColor="{Binding CategoryColor}" HorizontalOptions="End" />
+                                        <Label Text="{Binding TypeDisplay}" FontSize="10" TextColor="Gray" HorizontalOptions="End" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="32" Spacing="12">
+                            <Label Text="📭" FontSize="48" HorizontalOptions="Center" />
+                            <Label Text="No transactions yet" FontSize="18" TextColor="Gray" HorizontalOptions="Center" />
+                            <Label Text="Tap the + button to add your first transaction" FontSize="14" TextColor="Gray" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>
