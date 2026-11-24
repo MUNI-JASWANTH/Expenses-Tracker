@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FirstMauiApp.Views.SettingsPage"
+             Title="Settings">
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16" MaximumWidthRequest="640">
+            <Label Text="Currency settings" FontSize="26" FontAttributes="Bold" />
+            <Label Text="Choose the currency used to display your amounts." />
+            <Picker x:Name="CurrencyPicker" Title="Display currency" SelectedIndexChanged="OnCurrencyChanged" />
+            <Label x:Name="ExampleLabel" FontSize="20" FontAttributes="Bold" />
+            <Border Stroke="#C69B46" StrokeThickness="1" Padding="14">
+                <Label Text="Important: Changing this setting only changes how amounts are displayed. It does NOT convert existing transactions, budgets or reports using exchange rates. Use one currency consistently for your records." LineBreakMode="WordWrap" />
+            </Border>
+            <Label Text="Your selection is saved on this device. Return to another tab to see the new currency formatting." FontSize="12" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

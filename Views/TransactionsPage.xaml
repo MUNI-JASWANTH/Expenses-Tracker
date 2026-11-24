@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FirstMauiApp.ViewModels"
+             xmlns:models="clr-namespace:FirstMauiApp.Models"
+             xmlns:converters="clr-namespace:FirstMauiApp.Converters"
+             x:Class="FirstMauiApp.Views.TransactionsPage"
+             x:DataType="viewmodels:TransactionsViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:DecimalToCurrencyConverter x:Key="CurrencyConverter" />
+            <converters:CategoryToIconConverter x:Key="CategoryIconConverter" />
+            <converters:CategoryToColorConverter x:Key="CategoryColorConverter" />
+            <converters:NegativeToPositiveConverter x:Key="NegativeToPositiveConverter" />
+            <converters:TransactionTypeToColorConverter x:Key="TransactionTypeToColorConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add" Command="{Binding AddTransactionCommand}" Priority="0" Order="Primary" />
+    </ContentPage.ToolbarItems>
+
+    <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsLoading}">
+        <ScrollView>
+            <VerticalStackLayout Spacing="0">
+
+                <!-- Filter Bar -->
+                <Border Margin="16,16,16,8" Padding="12" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#2D2D2D}">
+                    <VerticalStackLayout Spacing="12">
+                        <SearchBar Placeholder="Search descriptions, categories or type"
+                                   Text="{Binding SearchText, Mode=TwoWay}"
+                                   AutomationId="TransactionSearch" />
+                        <!-- Date Range -->
+                        <Grid ColumnDefinitions="Auto,*,Auto,*" ColumnSpacing="8">
+                            <Label Grid.Column="0" Text="From:" FontSize="14" VerticalOptions="Center" />
+                            <DatePicker Grid.Column="1" Date="{Binding StartDate}" />
+                            <Label Grid.Column="2" Text="To:" FontSize="14" VerticalOptions="Center" />
+                            <DatePicker Grid.Column="3" Date="{Binding EndDate}" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Button Grid.Column="0" Text="Apply Filters" Command="{Binding ApplyFiltersCommand}" BackgroundColor="#512BD4" TextColor="White" CornerRadius="8" HeightRequest="40" />
+                            <Button Grid.Column="1" Text="Clear Filters" Command="{Binding ClearFiltersCommand}" BackgroundColor="#757575" TextColor="White" CornerRadius="8" HeightRequest="40" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Totals Summary -->
+                <Border Margin="16,8" Padding="16" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}">
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Income" FontSize="12" TextColor="Gray" />
+                            <Label Text="{Binding TotalIncome, Converter={StaticResource CurrencyConverter}}" FontSize="18" FontAttributes="Bold" TextColor="Green" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Expenses" FontSize="12" TextColor="Gray" />
+                            <Label Text="{Binding TotalExpense, Converter={StaticResource CurrencyConverter}}" FontSize="18" FontAttributes="Bold" TextColor="Red" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="4">
+                            <Label Text="Net" FontSize="12" TextColor="Gray" />
+                            <Label Text="{Binding NetBalance, Converter={StaticResource CurrencyConverter}}" FontSize="18" FontAttributes="Bold"
+                                   TextColor="{Binding NetBalance, Converter={StaticResource NegativeToPositiveConverter}, ConverterParameter='#2E7D32|#C62828'}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Transaction Count -->
+                <Label Margin="16,8,16,0" FontSize="13" TextColor="Gray">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Showing " />
+                            <Span Text="{Binding FilteredTransactions.Count}" FontAttributes="Bold" />
+                            <Span Text=" transactions" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+
+                <!-- Transactions List -->
+                <CollectionView ItemsSource="{Binding FilteredTransactions}" SelectionMode="None" Margin="16,8,16,16">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Transaction">
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems Mode="Reveal">
+                                        <SwipeItem Text="Edit" BackgroundColor="#1565C0" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TransactionsViewModel}}, Path=EditTransactionCommand}" CommandParameter="{Binding .}" />
+                                        <SwipeItem Text="Delete" BackgroundColor="#C62828" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TransactionsViewModel}}, Path=DeleteTransactionCommand}" CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+                                <Border Margin="0,4" Padding="12" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{AppThemeBinding Light=White, Dark=#2D2D2D}">
+                                    <Grid ColumnDefinitions="48,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="10">
+                                        <Border Grid.Column="0" WidthRequest="48" HeightRequest="48" StrokeShape="RoundRectangle 24" Stroke="Transparent" BackgroundColor="{Binding Category, Converter={StaticResource CategoryColorConverter}}" VerticalOptions="Center">
+                                            <Label Text="{Binding Category, Converter={StaticResource CategoryIconConverter}}" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding Description}" FontSize="16" FontAttributes="Bold" LineBreakMode="TailTruncation" />
+                                            <HorizontalStackLayout Spacing="8">
+                                                <Label Text="{Binding CategoryDisplay}" FontSize="12" TextColor="Gray" />
+                                                <Label Text="•" FontSize="12" TextColor="Gray" />
+                                                <Label Text="{Binding Date, StringFormat='{0:MMM dd, yyyy HH:mm}'}" FontSize="12" TextColor="Gray" />
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding FormattedSignedAmount}" FontSize="16" FontAttributes="Bold" TextColor="{Binding Type, Converter={StaticResource TransactionTypeToColorConverter}}" HorizontalOptions="End" />
+                                            <Label Text="{Binding TypeDisplay}" FontSize="10" TextColor="Gray" HorizontalOptions="End" />
+                                        </VerticalStackLayout>
+                                        <!-- Visible actions work with mouse, keyboard, and touch.
+                                             Swipe actions remain available on mobile. -->
+                                        <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                                                               Spacing="8" HorizontalOptions="End">
+                                            <Button Text="Edit" AutomationId="EditTransactionButton"
+                                                    SemanticProperties.Description="Edit this transaction"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TransactionsViewModel}}, Path=EditTransactionCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="#1565C0" TextColor="White"
+                                                    CornerRadius="8" MinimumWidthRequest="80" HeightRequest="40" />
+                                            <Button Text="Delete" AutomationId="DeleteTransactionButton"
+                                                    SemanticProperties.Description="Delete this transaction"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TransactionsViewModel}}, Path=DeleteTransactionCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="#C62828" TextColor="White"
+                                                    CornerRadius="8" MinimumWidthRequest="80" HeightRequest="40" />
+                                        </HorizontalStackLayout>
+                                    </Grid>
+                                </Border>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="32" Spacing="12">
+                            <Label Text="📭" FontSize="48" HorizontalOptions="Center" />
+                            <Label Text="No transactions found" FontSize="18" TextColor="Gray" HorizontalOptions="Center" />
+                            <Label Text="Adjust filters or add a new transaction" FontSize="14" TextColor="Gray" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

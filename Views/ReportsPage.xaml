@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FirstMauiApp.ViewModels"
+             x:Class="FirstMauiApp.Views.ReportsPage"
+             x:DataType="viewmodels:ReportsViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+            <!-- Month Selector -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
+                <Button Text="&lt;" Command="{Binding PreviousMonthCommand}" WidthRequest="44" HeightRequest="44" CornerRadius="22" />
+                <Label Text="{Binding MonthYearDisplay}" FontSize="20" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" />
+                <Button Text="&gt;" Command="{Binding NextMonthCommand}" WidthRequest="44" HeightRequest="44" CornerRadius="22" />
+            </HorizontalStackLayout>
+
+            <!-- Expense Breakdown -->
+            <Label Text="Expenses Breakdown" FontSize="18" FontAttributes="Bold" Margin="0,8,0,4" />
+            <CollectionView ItemsSource="{Binding ExpenseCategories}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewmodels:CategoryData">
+                        <Border StrokeShape="RoundRectangle 8" Stroke="LightGray" Padding="12" Margin="0,3">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding CategoryDisplay}" FontAttributes="Bold" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding FormattedAmount}" FontAttributes="Bold" />
+                                <ProgressBar Grid.Row="1" Grid.ColumnSpan="2" Progress="{Binding ProgressValue}"
+                                             ProgressColor="{Binding CategoryColor}" HeightRequest="6" Margin="0,6,0,2" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Income Breakdown -->
+            <Label Text="Income Breakdown" FontSize="18" FontAttributes="Bold" Margin="0,16,0,4" />
+            <CollectionView ItemsSource="{Binding IncomeCategories}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewmodels:CategoryData">
+                        <Border StrokeShape="RoundRectangle 8" Stroke="LightGray" Padding="12" Margin="0,3">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="{Binding CategoryDisplay}" FontAttributes="Bold" />
+                                <Label Grid.Column="1" Text="{Binding FormattedAmount}" FontAttributes="Bold" TextColor="Green" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

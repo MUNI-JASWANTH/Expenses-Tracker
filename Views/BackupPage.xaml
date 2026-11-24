@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FirstMauiApp.Views.BackupPage"
+             Title="Backup &amp; Restore">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="18" MaximumWidthRequest="650">
+            <Label Text="Protect your expense records" FontSize="24" FontAttributes="Bold" />
+            <Label Text="Export your transactions and budgets to a portable JSON file. Save it somewhere safe, such as your personal cloud storage." />
+            <Button x:Name="ExportButton" Text="Export backup" Clicked="OnExportClicked" />
+            <Label Text="Restore replaces ALL transactions and budgets currently on this device. Export a backup first. Only import files you trust." />
+            <Button x:Name="RestoreButton" Text="Restore from backup" Clicked="OnRestoreClicked" />
+            <Label x:Name="StatusLabel" Text="No backup operation performed yet." LineBreakMode="WordWrap" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

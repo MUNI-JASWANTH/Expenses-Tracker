@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FirstMauiApp.ViewModels"
+             xmlns:models="clr-namespace:FirstMauiApp.Models"
+             xmlns:converters="clr-namespace:FirstMauiApp.Converters"
+             x:Class="FirstMauiApp.Views.AddTransactionPage"
+             x:DataType="viewmodels:AddTransactionViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:CategoryToIconConverter x:Key="CategoryIconConverter" />
+            <converters:CategoryToColorConverter x:Key="CategoryColorConverter" />
+            <converters:TransactionTypeToCategoryColorConverter x:Key="TypeToColorConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Cancel" Command="{Binding CancelCommand}" Priority="0" Order="Primary" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- Type Selector -->
+            <Border Padding="12" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#2D2D2D}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Transaction Type" FontSize="16" FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <Button Grid.Column="0" Text="Income"
+                                Command="{Binding SelectIncomeCommand}"
+                                BackgroundColor="{Binding SelectedType, Converter={StaticResource TypeToColorConverter}, ConverterParameter='Income'}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="48"
+                                FontAttributes="Bold" />
+                        <Button Grid.Column="1" Text="Expense"
+                                Command="{Binding SelectExpenseCommand}"
+                                BackgroundColor="{Binding SelectedType, Converter={StaticResource TypeToColorConverter}, ConverterParameter='Expense'}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="48"
+                                FontAttributes="Bold" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Category Selector -->
+            <Border Padding="12" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#2D2D2D}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Category" FontSize="16" FontAttributes="Bold" />
+                    <CollectionView ItemsSource="{Binding SelectedType, Converter={x:Static converters:CategoryListConverter.Instance}}"
+                                    SelectionMode="Single"
+                                    SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
+                                    HorizontalOptions="Fill">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="3" VerticalItemSpacing="8" HorizontalItemSpacing="8" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="x:Object">
+                                <Border Padding="12" StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{Binding Converter={StaticResource CategoryColorConverter}}">
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroupList>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal" />
+                                                <VisualState x:Name="Selected">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="Stroke" Value="White" />
+                                                        <Setter Property="StrokeThickness" Value="3" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateGroupList>
+                                    </VisualStateManager.VisualStateGroups>
+                                    <VerticalStackLayout HorizontalOptions="Center" Spacing="4">
+                                        <Label Text="{Binding Converter={StaticResource CategoryIconConverter}}" FontSize="24" HorizontalOptions="Center" />
+                                        <Label Text="{Binding .}" FontSize="11" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Amount -->
+            <Border Padding="12" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#2D2D2D}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Amount" FontSize="16" FontAttributes="Bold" />
+                    <Entry Text="{Binding Amount}"
+                           Placeholder="0.00"
+                           Keyboard="Numeric"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{Binding SelectedType, Converter={StaticResource TypeToColorConverter}, ConverterParameter='Income|Expense'}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Description -->
+            <Border Padding="12" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#2D2D2D}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Description" FontSize="16" FontAttributes="Bold" />
+                    <Entry Text="{Binding Description}"
+                           Placeholder="Enter description"
+                           FontSize="16"
+                           ReturnType="Done" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Date & Time -->
+            <Border Padding="12" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#2D2D2D}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Date &amp; Time" FontSize="16" FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <DatePicker Grid.Column="0" Date="{Binding SelectedDate}" />
+                        <TimePicker Grid.Column="1" Time="{Binding SelectedTime}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Save Button -->
+            <Button Text="{Binding IsEditing, Converter={x:Static converters:BoolToTextConverterStatic.Instance}, ConverterParameter='Update Transaction|Save Transaction'}"
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="#512BD4"
+                    TextColor="White"
+                    CornerRadius="12"
+                    HeightRequest="52"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    Margin="0,8,0,0" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
